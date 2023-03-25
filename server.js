@@ -49,7 +49,7 @@ const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
     // origin: "https://chat-app-wsml.onrender.com",
-    origin: "*",
+    origin: "ws://localhost:8100",
     // credentials: true,
   },
 });

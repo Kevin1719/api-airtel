@@ -34,7 +34,6 @@ router.get('/token', function(req, res, next) {
 });
 
 const getToken = (tokenget) => {
-  var token = [];
   const inputbody = {
     client_id: "2601f408-027d-4dc5-a538-f995bf4ee17d",
     client_secret: "a353ed73-c3cf-4c97-8135-13f4a1976cc1",
@@ -64,12 +63,13 @@ async function getMyToken() {
   return new Promise((resolve, reject) => {
     getToken((token) => {
       resolve(token);
+      console.log(token)
     });
   });
 }
 
 
-const getStatus = (token, transactionId) => {
+const getStatus = async (token, transactionId) => {
   try {
     const headers = {
       'Accept':'*/*',
@@ -77,26 +77,64 @@ const getStatus = (token, transactionId) => {
       'X-Currency':'MGA',
       'Authorization': `Bearer ${token}`
     };
-      fetch(`https://openapiuat.airtel.africa/standard/v1/payments/${transactionId}`,
+    await fetch(`https://openapiuat.airtel.africa/standard/v1/payments/${transactionId}`,
     {
       method: 'GET',
       headers: headers
     })
     .then(function(res) {
         return res.json();
-    }).then(function(body) {
-        return body;
-    });
+    }).then(data => {
+      io.io.emit('transaction', data)
+      console.log(data)
+      setTimeout(() => {
+        const clone = data
+        clone.data.transaction.status = 'TS'
+        io.io.emit('transaction',clone)
+      },10000)
+    })
+    
 
   } catch (error) {
     console.log(error)
+    return res.status(500).json({message : "il y a eu une erreur lors de la transaction", error});
   }
 }
+
+router.get('/status/:idTrans', async function(req, res) {
+  const myToken = await getMyToken();
+  // return myToken;
+  try{
+    const { idTrans } = req.params;
+    const headers = {
+      'Accept':'*/*',
+      'X-Country':'MG',
+      'X-Currency':'MGA',
+      'Authorization': `Bearer ${myToken}`
+    };
+    
+    fetch(`https://openapiuat.airtel.africa/standard/v1/payments/${idTrans}`,
+    {
+      method: 'GET',
+      headers: headers
+    })
+    .then(function(res) {
+        return res.json();
+    })
+    .then(res => {
+      console.log(res)
+    });
+  } catch(err){
+    console.log(err);
+    return res.status(500).json({"message" : "il y a eu une erreur lors de la transaction", err});
+  }
+});
 
 router.get('/transaction/apiAirtel', async function(req, res, next) {
   try{
     const msisdn = req.query.msisdn;
     const amount = req.query.amount;
+    const idTrans = req.query.idTrans;
     const myToken = await getMyToken();
     const inputBody = {
       reference: "Testing transaction",
@@ -109,7 +147,7 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
         amount: amount,
         country: "MG",
         currency: "MGA",
-        id: "11551355"
+        id: idTrans
       }
     };
     const headers = {
@@ -129,8 +167,9 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
     .then(function(res) {
         return res.json();
     }).then(function(body) {
-        return res.status(200).send(getStatus(myToken, "11551355"));
+        getStatus(myToken, idTrans)
     });
+
   }
   catch(err){
     console.log(err);
