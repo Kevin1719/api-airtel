@@ -1,7 +1,7 @@
 var express = require('express');
 var fetch = require("node-fetch");
 var router = express.Router();
-
+const bcrypt = require('bcrypt');
 
 router.get('/token', function(req, res, next) {
   try{
@@ -59,15 +59,24 @@ const getToken = (tokenget) => {
   }).catch(err => console.log(err));
 }
 
+async function getMyToken() {
+  return new Promise((resolve, reject) => {
+    getToken((token) => {
+      resolve(token);
+    });
+  });
+}
 
-router.get('/transaction/apiAirtel', function(req, res, next) {
+router.get('/transaction/apiAirtel', async function(req, res, next) {
   try{
+    // const salt = bcrypt.genSaltSync(10);
+    // const date = bcrypt.hashSync(new Date().toString(), salt); 
+    const date = new Date();
+    // return res.send(date);
     const msisdn = req.query.msisdn;
     const amount = req.query.amount;
-    var tokens;
-    getToken(token => {
-      tokens = token
-    })
+    const myToken = await getMyToken();
+    // return res.send(myToken);
     const inputBody = {
       reference: "Testing transaction",
       subscriber: {
@@ -79,7 +88,7 @@ router.get('/transaction/apiAirtel', function(req, res, next) {
         amount: amount,
         country: "MG",
         currency: "MGA",
-        id: "random-unique-id"
+        id: date.getTime()
       }
     };
     const headers = {
@@ -87,7 +96,7 @@ router.get('/transaction/apiAirtel', function(req, res, next) {
       'Accept':'*/*',
       'X-Country':'MG',
       'X-Currency':'MGA',
-      'Authorization': `Bearer ${tokens}`
+      'Authorization': `Bearer ${myToken}`
     }
 
     fetch('https://openapiuat.airtel.africa/merchant/v1/payments/',
