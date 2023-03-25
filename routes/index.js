@@ -85,10 +85,9 @@ const getStatus = (token, transactionId) => {
     .then(function(res) {
         return res.json();
     }).then(function(body) {
-        io.io.emit('status', body)
-        setInterval(() => {
-          console.log(body);
-        }, 5000);
+        io.io.emit('status', async body => {
+          console.log(body)
+        })
     });
   } catch (error) {
     
@@ -136,7 +135,7 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
         return res.json();
     }).then(function(body) {
         getStatus(myToken, "11551352");
-      return res.status(200).send(body);
+        return res.status(200).send(body);
     });
   }
   catch(err){
