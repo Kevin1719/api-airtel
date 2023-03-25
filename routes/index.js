@@ -2,7 +2,7 @@ var express = require('express');
 var fetch = require("node-fetch");
 var router = express.Router();
 const bcrypt = require('bcrypt');
-const { io } = require('../server');
+const io  = require('../server');
 
 router.get('/token', function(req, res, next) {
   try{
@@ -85,8 +85,10 @@ const getStatus = (token, transactionId) => {
     .then(function(res) {
         return res.json();
     }).then(function(body) {
-        io.emit('status', body.data.transaction.status)
-        console.log(body);
+        io.io.emit('status', body)
+        setInterval(() => {
+          console.log(body);
+        }, 5000);
     });
   } catch (error) {
     
@@ -95,8 +97,6 @@ const getStatus = (token, transactionId) => {
 
 router.get('/transaction/apiAirtel', async function(req, res, next) {
   try{
-    const date = new Date();
-    var testID = date.getTime()
     // const salt = bcrypt.genSaltSync(10);
     // const date = bcrypt.hashSync(new Date().toString(), salt); 
     // return res.send(date);
@@ -115,7 +115,7 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
         amount: amount,
         country: "MG",
         currency: "MGA",
-        id: testID
+        id: "11551352"
       }
     };
     const headers = {
@@ -135,7 +135,7 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
     .then(function(res) {
         return res.json();
     }).then(function(body) {
-      getStatus(myToken, testID)
+        getStatus(myToken, "11551352");
       return res.status(200).send(body);
     });
   }
@@ -143,4 +143,5 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
     console.log(err);
   }
 });
+
 module.exports = router;

@@ -56,9 +56,6 @@ const io = require("socket.io")(server, {
 
 io.on("connection", (socket) => {
   console.log("Connected to socket.io");
-  socket.on('status',(status)=>{
-    console.log(status)
-  })
 })
 
 exports.io = io
