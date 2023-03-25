@@ -68,6 +68,7 @@ async function getMyToken() {
   });
 }
 
+
 const getStatus = (token, transactionId) => {
   try {
     const headers = {
@@ -76,8 +77,7 @@ const getStatus = (token, transactionId) => {
       'X-Currency':'MGA',
       'Authorization': `Bearer ${token}`
     };
-
-    fetch(`https://openapiuat.airtel.africa/standard/v1/payments/${transactionId}`,
+      fetch(`https://openapiuat.airtel.africa/standard/v1/payments/${transactionId}`,
     {
       method: 'GET',
       headers: headers
@@ -85,24 +85,19 @@ const getStatus = (token, transactionId) => {
     .then(function(res) {
         return res.json();
     }).then(function(body) {
-        io.io.emit('status', async body => {
-          console.log(body)
-        })
+        return body;
     });
+
   } catch (error) {
-    
+    console.log(error)
   }
 }
 
 router.get('/transaction/apiAirtel', async function(req, res, next) {
   try{
-    // const salt = bcrypt.genSaltSync(10);
-    // const date = bcrypt.hashSync(new Date().toString(), salt); 
-    // return res.send(date);
     const msisdn = req.query.msisdn;
     const amount = req.query.amount;
     const myToken = await getMyToken();
-    // return res.send(myToken);
     const inputBody = {
       reference: "Testing transaction",
       subscriber: {
@@ -114,7 +109,7 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
         amount: amount,
         country: "MG",
         currency: "MGA",
-        id: "11551352"
+        id: "11551355"
       }
     };
     const headers = {
@@ -134,8 +129,7 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
     .then(function(res) {
         return res.json();
     }).then(function(body) {
-        getStatus(myToken, "11551352");
-        return res.status(200).send(body);
+        return res.status(200).send(getStatus(myToken, "11551355"));
     });
   }
   catch(err){
