@@ -45,4 +45,22 @@ server.on('listening', () => {
 
 });
 
+const io = require("socket.io")(server, {
+  pingTimeout: 60000,
+  cors: {
+    // origin: "https://chat-app-wsml.onrender.com",
+    origin: "*",
+    // credentials: true,
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("Connected to socket.io");
+  socket.on('status',(status)=>{
+    console.log(status)
+  })
+})
+
+exports.io = io
+
 server.listen(port);

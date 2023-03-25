@@ -2,6 +2,7 @@ var express = require('express');
 var fetch = require("node-fetch");
 var router = express.Router();
 const bcrypt = require('bcrypt');
+const { io } = require('../server');
 
 router.get('/token', function(req, res, next) {
   try{
@@ -108,6 +109,7 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
     .then(function(res) {
         return res.json();
     }).then(function(body) {
+      io.emit('status', body.data.transaction.status)
       return res.status(200).send(body);
     });
   }
