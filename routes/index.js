@@ -68,11 +68,37 @@ async function getMyToken() {
   });
 }
 
+const getStatus = (token, transactionId) => {
+  try {
+    const headers = {
+      'Accept':'*/*',
+      'X-Country':'MG',
+      'X-Currency':'MGA',
+      'Authorization': `Bearer ${token}`
+    };
+
+    fetch(`https://openapiuat.airtel.africa/standard/v1/payments/${transactionId}`,
+    {
+      method: 'GET',
+      headers: headers
+    })
+    .then(function(res) {
+        return res.json();
+    }).then(function(body) {
+        io.emit('status', body.data.transaction.status)
+        console.log(body);
+    });
+  } catch (error) {
+    
+  }
+}
+
 router.get('/transaction/apiAirtel', async function(req, res, next) {
   try{
+    const date = new Date();
+    var testID = date.getTime()
     // const salt = bcrypt.genSaltSync(10);
     // const date = bcrypt.hashSync(new Date().toString(), salt); 
-    const date = new Date();
     // return res.send(date);
     const msisdn = req.query.msisdn;
     const amount = req.query.amount;
@@ -89,7 +115,7 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
         amount: amount,
         country: "MG",
         currency: "MGA",
-        id: date.getTime()
+        id: testID
       }
     };
     const headers = {
@@ -109,7 +135,7 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
     .then(function(res) {
         return res.json();
     }).then(function(body) {
-      io.emit('status', body.data.transaction.status)
+      getStatus(myToken, testID)
       return res.status(200).send(body);
     });
   }
