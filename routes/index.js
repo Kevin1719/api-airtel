@@ -91,7 +91,7 @@ const getStatus = async (token, transactionId) => {
         const clone = data
         clone.data.transaction.status = 'TS'
         io.io.emit('transaction',clone)
-      },10000)
+      }, 17000)
     })
     
 
@@ -176,4 +176,31 @@ router.get('/transaction/apiAirtel', async function(req, res, next) {
   }
 });
 
+router.get('/userInfo', async function(req, res) {
+  try {
+    const myToken = await getMyToken();
+    const msisdn = req.query.msisdn
+    const headers = {
+      'Accept':'*/*',
+      'X-Country':'MG',
+      'X-Currency':'MGA',
+      'Authorization': `Bearer ${myToken}`
+    };
+    
+    fetch(`https://openapiuat.airtel.africa/standard/v1/users/${msisdn}`,
+    {
+      method: 'GET',
+    
+      headers: headers
+    })
+    .then(function(res) {
+        return res.json();
+    }).then(function(body) {
+        return res.status(201).send(body)
+    });
+  } catch (error) {
+    console.log(error);
+  }
+  
+})
 module.exports = router;
