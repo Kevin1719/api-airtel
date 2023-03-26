@@ -202,5 +202,34 @@ router.get('/userInfo', async function(req, res) {
     console.log(error);
   }
   
+});
+
+router.get('/solde', async function(req, res) {
+  try {
+    const myToken = await getMyToken();
+    
+    const headers = {
+      'Accept':'*/*',
+      'X-Country':'MG',
+      'X-Currency':'MGA',
+      'Authorization': `Bearer ${myToken}`
+
+    };
+
+    fetch('https://openapiuat.airtel.africa/standard/v1/users/balance',
+    {
+      method: 'GET',
+
+      headers: headers
+    })
+    .then(function(res) {
+        return res.json();
+    }).then(function(body) {
+      return res.status(201).send(body)
+    });
+  }
+  catch(error){
+    console.log(error);
+  }
 })
 module.exports = router;
